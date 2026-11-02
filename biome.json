@@ -1,0 +1,92 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "includes": ["**", "!dist", "!public", "!src-tauri"]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "linter": {
+    "rules": {
+      "preset": "recommended"
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["src/providers/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/ui/**", "**/tauri/**", "react", "react-dom", "@xyflow/**", "@tauri-apps/**"],
+                    "message": "Providers are reached through a fetch the caller passes in. They must not depend on UI or Tauri."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/agents/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/ui/**", "**/tauri/**", "react", "react-dom", "@xyflow/**", "@tauri-apps/**"],
+                    "message": "Agents may depend on the diagram domain and providers, never on UI or Tauri."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/diagram/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "**/ui/**",
+                      "**/agents/**",
+                      "**/providers/**",
+                      "**/tauri/**",
+                      "react",
+                      "react-dom",
+                      "@xyflow/**",
+                      "@tauri-apps/**"
+                    ],
+                    "message": "The diagram domain is plain TypeScript plus Zod. It must not depend on UI, Tauri, agents or providers."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

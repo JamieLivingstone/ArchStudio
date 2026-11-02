@@ -1,0 +1,29 @@
+version: 2
+updates:
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      dependencies:
+        patterns: ["*"]
+    ignore:
+      # Pinned: 1.11.13 drops connection lines from exported images.
+      - dependency-name: html-to-image
+  - package-ecosystem: cargo
+    directory: /src-tauri
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      dependencies:
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7

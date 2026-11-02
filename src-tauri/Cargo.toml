@@ -1,0 +1,54 @@
+[package]
+name = "archstudio"
+version = "0.1.0-1"
+description = "Design, understand and review software architecture with AI."
+authors = ["Jamie Livingstone"]
+license = "MIT"
+repository = "https://github.com/JamieLivingstone/ArchStudio"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "archstudio_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+# The binary's name is what macOS shows for the app when it runs unbundled, as in `tauri dev`.
+[[bin]]
+name = "ArchStudio"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+# The operating system's own credential store: Keychain, Credential Manager, Secret Service.
+keyring = { version = "3", features = ["apple-native", "windows-native", "sync-secret-service"] }
+# Requests to model providers are made here, never in the webview, so an API key stays out of it.
+reqwest = "0.13"
+tokio = { version = "1", features = ["sync", "macros"] }
+tauri-plugin-process = "2"
+
+
+# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+security-framework = "3"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-updater = "2"

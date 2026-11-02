@@ -1,0 +1,244 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light dark;
+  --surface: #ffffff;
+  --canvas: #f4f4f5;
+  --line: #e4e4e7;
+  --hover: #f4f4f5;
+  --fg: #18181b;
+  --muted: #71717a;
+  --accent: #4f46e5;
+}
+
+/* Dark applies when the system is dark, unless the theme setting forces light... */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface: #1c1c1f;
+    --canvas: #111113;
+    --line: #2c2c31;
+    --hover: #2a2a2f;
+    --fg: #fafafa;
+    --muted: #a1a1aa;
+    --accent: #818cf8;
+  }
+}
+
+/* ...and whenever the theme setting forces dark. Keep both blocks the same. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1c1c1f;
+  --canvas: #111113;
+  --line: #2c2c31;
+  --hover: #2a2a2f;
+  --fg: #fafafa;
+  --muted: #a1a1aa;
+  --accent: #818cf8;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-canvas: var(--canvas);
+  --color-line: var(--line);
+  --color-hover: var(--hover);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--canvas);
+  overscroll-behavior: none;
+}
+
+.react-flow {
+  --xy-background-color: var(--canvas);
+  --xy-edge-stroke: color-mix(in srgb, var(--muted) 80%, var(--canvas));
+  --xy-edge-stroke-width: 1.5;
+  --xy-edge-stroke-selected: var(--accent);
+  --xy-handle-background-color: var(--muted);
+  --xy-handle-border-color: var(--surface);
+}
+
+/* Lines to things inside boundaries are raised above the labels, and would cut through them. */
+.react-flow__edgelabel-renderer {
+  z-index: 2000;
+}
+
+.react-flow.arranging .react-flow__viewport {
+  opacity: 0;
+}
+
+.react-flow.arranging-proposal .proposed-added {
+  opacity: 0;
+}
+
+.react-flow {
+  --added: #059669;
+  --removed: #ef4444;
+}
+.react-flow__node[class*="proposed-"] {
+  border-radius: 14px;
+  outline: 2px solid var(--proposed);
+  outline-offset: 4px;
+  transition:
+    outline-width 150ms,
+    box-shadow 150ms;
+}
+.react-flow__node[class*="proposed-"]::before {
+  content: var(--proposed-label);
+  position: absolute;
+  top: -14px;
+  left: 10px;
+  z-index: 1;
+  padding: 1px 7px;
+  border-radius: 6px;
+  background: var(--proposed);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.react-flow__node.proposed-added {
+  --proposed-label: "New";
+}
+.react-flow__node.proposed-changed {
+  --proposed-label: "Changed";
+}
+.react-flow__node.proposed-removed {
+  --proposed-label: "Removed";
+}
+.react-flow__node-sphere[class*="proposed-"] {
+  border-radius: 9999px;
+}
+.react-flow__node.proposed-added,
+.react-flow__edge.proposed-added {
+  --proposed: var(--added);
+}
+.react-flow__node.proposed-changed,
+.react-flow__edge.proposed-changed {
+  --proposed: var(--accent);
+}
+.react-flow__node.proposed-removed,
+.react-flow__edge.proposed-removed {
+  --proposed: var(--removed);
+  opacity: 0.55;
+}
+.react-flow__node.proposed-removed {
+  outline-style: dashed;
+}
+.react-flow__node.proposed-focus {
+  outline-width: 3px;
+  box-shadow: 0 0 0 10px color-mix(in srgb, var(--proposed) 22%, transparent);
+}
+.react-flow__edge[class*="proposed-"] .react-flow__edge-path {
+  stroke: var(--proposed);
+}
+.react-flow__edge.proposed-removed .react-flow__edge-path {
+  stroke-dasharray: 4 4;
+}
+.react-flow__edge.proposed-focus .react-flow__edge-path {
+  stroke-width: 3.5;
+}
+
+.react-flow__selection {
+  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/*
+ * The box left around the selected nodes afterwards. React Flow fits it to the
+ * nodes exactly, which cuts through their selection outlines, so it is drawn as
+ * an unfilled dashed line standing clear of them instead.
+ */
+.react-flow__nodesselection-rect,
+.react-flow__nodesselection-rect:focus,
+.react-flow__nodesselection-rect:focus-visible {
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  outline: 1px dashed color-mix(in srgb, var(--accent) 60%, transparent);
+  outline-offset: 12px;
+}
+
+.react-flow__handle {
+  width: 8px;
+  height: 8px;
+}
+
+.react-flow__handle::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 9999px;
+}
+
+.react-flow__handle {
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.react-flow__node:hover .react-flow__handle,
+.react-flow__node.selected .react-flow__handle,
+.react-flow__handle.connectingfrom,
+.react-flow__handle.connectingto {
+  opacity: 1;
+}
+
+.react-flow__node .react-flow__handle:hover,
+.react-flow__node .react-flow__handle.connectingfrom,
+.react-flow__node .react-flow__handle.connectingto {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.react-flow__node.drop-target .boundary-frame {
+  border-color: var(--accent);
+  border-style: solid;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.react-flow__node.in-selected-group > div:not(.react-flow__handle):not(.react-flow__resize-control) {
+  outline: 1.5px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+/* An exported image leaves out the selection, and WebKit would draw blurred shadows as hard blocks. */
+.react-flow__viewport.exporting {
+  --xy-edge-stroke-selected: var(--xy-edge-stroke);
+}
+
+.react-flow__viewport.exporting * {
+  outline: none;
+  box-shadow: none;
+  transition: none;
+}
+
+.react-flow__viewport.exporting .react-flow__node.in-selected-group > div {
+  outline: none;
+}
+
+.react-flow__viewport.exporting .react-flow__handle,
+.react-flow__viewport.exporting .react-flow__resize-control,
+.react-flow__viewport.exporting .react-flow__nodesselection {
+  display: none;
+}
+
+@utility floating {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 8px 24px rgb(0 0 0 / 0.08);
+}

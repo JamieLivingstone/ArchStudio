@@ -1,0 +1,3 @@
+[install]
+# Seven days, in seconds: compromised releases are usually caught within that.
+minimumReleaseAge = 604800
