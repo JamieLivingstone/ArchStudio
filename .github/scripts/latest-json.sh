@@ -3,7 +3,7 @@
 set -euo pipefail
 
 release=$1
-tag=${GITHUB_REF_NAME:?}
+tag=${TAG:?}
 base="https://github.com/${GITHUB_REPOSITORY:?}/releases/download/$tag"
 
 entry() {

@@ -28,9 +28,14 @@ cargo test
 
 ## Releasing
 
-Set the same version in `package.json` and `src-tauri/Cargo.toml`, then push a tag such as `v0.1.0-1`. A prerelease number must be numeric, as Windows installers refuse anything else.
+1. In a pull request, set the same version in `package.json` and `src-tauri/Cargo.toml`, and run `cargo check` from `src-tauri/` to update `Cargo.lock`. A prerelease number must be numeric, as Windows installers refuse anything else.
+2. Merge it. Any merge to `main` with an unreleased version builds every platform.
+3. Approve the `release` environment when the run asks. Only this step can use the signing key.
+4. Test the draft release, then publish it. Publishing creates the tag and offers the update to installed apps.
 
-The tag builds every platform into a draft release. Publishing the draft is what offers the update to installed apps.
+The website is separate: every merge to `main` deploys [archstudio.app](https://archstudio.app) once CI passes.
+
+A run that fails uses up nothing: merge a fix and it runs again, replacing any old draft. A later merge also replaces a run still waiting for approval.
 
 Builds run with no secrets. A separate job that runs no build scripts signs the update files, so a compromised dependency never comes near the signing key.
 
