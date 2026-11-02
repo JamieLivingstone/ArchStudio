@@ -2,13 +2,35 @@ name: Release
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+  workflow_dispatch:
+
+# A newer merge replaces a release still waiting to be approved.
+concurrency:
+  group: release
+  cancel-in-progress: true
 
 permissions: {}
 
 jobs:
+  # Releases only a version that has no tag yet, which publishing the draft creates.
+  version:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.check.outputs.tag }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - id: check
+        run: .github/scripts/release-version.sh
+
   # Runs every build script and dependency, so it holds no secrets and no cache from other runs.
   build:
+    needs: version
+    if: needs.version.outputs.tag != ''
     strategy:
       fail-fast: false
       matrix:
@@ -62,7 +84,7 @@ jobs:
 
   # The only job with the signing key. It builds nothing: the Tauri CLI signs and nothing else runs.
   sign:
-    needs: build
+    needs: [version, build]
     runs-on: ubuntu-22.04
     environment: release
     permissions:
@@ -82,6 +104,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: .github/scripts/sign-release.sh unsigned release
       - run: .github/scripts/latest-json.sh release
+        env:
+          TAG: ${{ needs.version.outputs.tag }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: release
@@ -90,7 +114,7 @@ jobs:
 
   # The only job that can write to the repository. It runs nothing from it.
   publish:
-    needs: sign
+    needs: [version, sign]
     runs-on: ubuntu-22.04
     permissions:
       contents: write
@@ -99,9 +123,13 @@ jobs:
         with:
           name: release
           path: release
-      # Published by hand, which is what offers the update. GitHub's "latest" address skips prereleases.
+      # Published by hand, which is what offers the update and creates the tag. A retry replaces its old draft.
+      # GitHub's "latest" address skips prereleases.
       - name: Create the draft release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh release create "$GITHUB_REF_NAME" release/* --draft --title "ArchStudio $GITHUB_REF_NAME" --verify-tag
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          gh release delete "$TAG" --yes || true
+          gh release create "$TAG" release/* --draft --title "ArchStudio $TAG" --target "$GITHUB_SHA"
