@@ -4,7 +4,7 @@ import type { Diagram } from "../../../diagram/schema";
 import { formatLayout, getAppState } from "../../state";
 import { type Layout, layout } from "../layout/format";
 import { BOUNDARY_HEADER, estimatedSize } from "../nodes/sizes";
-import { fitOptions } from "../toolbar/ViewControls";
+import { useFitDiagram } from "./useFitDiagram";
 
 const headerOf = (id: string) =>
   BOUNDARY_HEADER +
@@ -34,7 +34,8 @@ export async function arrange(
 }
 
 export function useFormat() {
-  const { getNode, fitView } = useReactFlow();
+  const { getNode } = useReactFlow();
+  const fitDiagram = useFitDiagram();
   const running = useRef(false);
 
   return async ({ animate = true } = {}) => {
@@ -53,6 +54,6 @@ export function useFormat() {
     }
     // Once the canvas has drawn the new positions.
     await new Promise((resolve) => window.setTimeout(resolve, 150));
-    await fitView({ ...fitOptions(), duration: animate ? 300 : 0 });
+    await fitDiagram({ duration: animate ? 300 : 0 });
   };
 }

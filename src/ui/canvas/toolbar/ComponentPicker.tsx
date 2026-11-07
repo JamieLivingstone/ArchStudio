@@ -41,7 +41,10 @@ export function ComponentPicker({ onAdd, onDragStart }: ComponentPickerProps) {
   }
 
   return (
-    <section aria-label="Components" className="floating flex max-h-96 w-64 flex-col rounded-xl">
+    <section
+      aria-label="Components"
+      className="floating flex max-h-96 w-64 max-w-[calc(100vw-100px)] flex-col rounded-xl"
+    >
       <div className="px-1.5 pt-1.5 empty:hidden">
         <AddingTo />
       </div>

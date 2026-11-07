@@ -27,7 +27,7 @@ export function BoundaryPicker({ onAdd, onDragStart }: BoundaryPickerProps) {
   return (
     <section
       aria-label="Boundaries"
-      className="floating nowheel flex max-h-96 w-72 flex-col overflow-y-auto rounded-xl p-1.5"
+      className="floating nowheel flex max-h-96 w-72 max-w-[calc(100vw-100px)] flex-col overflow-y-auto rounded-xl p-1.5"
     >
       <AddingTo />
       <h3 className="px-2 pt-1.5 pb-1 text-[11px] font-medium text-muted">Boundaries</h3>

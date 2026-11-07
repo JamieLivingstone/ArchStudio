@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, expect, test, vi } from "vitest";
 import { emptyDiagram } from "../../../diagram/schema";
 import { hasNativeFiles, pickDiagramFile } from "../../../tauri/diagramFiles";
+import { isDesktop } from "../../../tauri/providers";
 import { button } from "../../../test/dom";
 import { Landing } from "../Landing";
 import { templates } from "../templates";
@@ -12,6 +13,8 @@ vi.mock("../../../tauri/diagramFiles", () => ({
   hasNativeFiles: vi.fn(() => false),
   pickDiagramFile: vi.fn(),
 }));
+
+vi.mock("../../../tauri/providers", () => ({ isDesktop: vi.fn(() => false) }));
 
 afterEach(() => vi.clearAllMocks());
 
@@ -82,4 +85,21 @@ test("dismissing the dialog closes it without starting anything", async () => {
   fireEvent(screen.getByRole("dialog"), new Event("close"));
   expect(onClose).toHaveBeenCalledTimes(2);
   expect(onStart).not.toHaveBeenCalled();
+});
+
+const link = (name: RegExp) => screen.getByRole("link", { name });
+
+test("in a browser, it links to the desktop app and the repository", () => {
+  setup();
+  expect(link(/Get the desktop app/).getAttribute("href")).toBe(
+    "https://github.com/JamieLivingstone/ArchStudio/releases/latest",
+  );
+  expect(link(/Open source on GitHub/).getAttribute("href")).toBe("https://github.com/JamieLivingstone/ArchStudio");
+});
+
+test("in the desktop app, it does not offer the desktop app", () => {
+  vi.mocked(isDesktop).mockReturnValue(true);
+  setup();
+  expect(screen.queryByRole("link", { name: /Get the desktop app/ })).toBeNull();
+  link(/Open source on GitHub/);
 });

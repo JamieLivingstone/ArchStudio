@@ -19,14 +19,18 @@ import { AlignmentGuides } from "./AlignmentGuides";
 import { ConnectionEdge } from "./edges/ConnectionEdge";
 import { useCanvasNodes } from "./hooks/useCanvasNodes";
 import { useCanvasShortcuts } from "./hooks/useCanvasShortcuts";
+import { useFitDiagram } from "./hooks/useFitDiagram";
 import { useFormat } from "./hooks/useFormat";
 import { nodeTypes } from "./nodes/nodeTypes";
 import { ProposalReview } from "./ProposalReview";
 import { HistoryControls } from "./toolbar/HistoryControls";
 import { type CanvasTool, Sidebar } from "./toolbar/Sidebar";
-import { fitOptions, ViewControls } from "./toolbar/ViewControls";
+import { ViewControls } from "./toolbar/ViewControls";
 
 const edgeTypes: EdgeTypes = { connection: ConnectionEdge };
+
+// A fingertip wobbles as it taps, which React Flow would take for a drag rather than a click that selects.
+const tapDistance = window.matchMedia?.("(pointer: coarse)").matches ? 8 : 0;
 
 interface CanvasProps {
   theme: Theme;
@@ -64,9 +68,25 @@ function ArrangeOnLoad({ onDone }: { onDone: () => void }) {
   return null;
 }
 
+function FitOnLoad({ onDone }: { onDone: () => void }) {
+  const ready = useStore(({ nodeLookup }) =>
+    [...nodeLookup.values()].every((node) => node.measured.height !== undefined),
+  );
+  const fitDiagram = useFitDiagram();
+  const done = useRef(false);
+
+  useEffect(() => {
+    if (!ready || done.current) return;
+    done.current = true;
+    fitDiagram({ duration: 0 }).then(onDone);
+  }, [ready, fitDiagram, onDone]);
+
+  return null;
+}
+
 export function Canvas({ theme, modelSelection, onOpenSettings, arrangeOnLoad = false, onArranged }: CanvasProps) {
   const [tool, setTool] = useState<CanvasTool>("move");
-  const [arranging, setArranging] = useState(arrangeOnLoad);
+  const [arranging, setArranging] = useState(true);
   const arranged = useCallback(() => setArranging(false), []);
   useEffect(() => {
     if (arrangeOnLoad && !arranging) onArranged?.();
@@ -100,6 +120,9 @@ export function Canvas({ theme, modelSelection, onOpenSettings, arrangeOnLoad = 
         return false;
       }}
       nodeOrigin={[0, 0]}
+      nodeClickDistance={tapDistance}
+      nodeDragThreshold={tapDistance || 1}
+      paneClickDistance={tapDistance}
       nodesDraggable={!previewing}
       nodesConnectable={!previewing}
       elementsSelectable={!previewing}
@@ -107,8 +130,6 @@ export function Canvas({ theme, modelSelection, onOpenSettings, arrangeOnLoad = 
       onNodeMouseLeave={previewing ? () => focusOn(undefined) : undefined}
       onEdgeMouseEnter={previewing ? (_, edge) => focusOn(edge.id, true) : undefined}
       onEdgeMouseLeave={previewing ? () => focusOn(undefined) : undefined}
-      fitView
-      fitViewOptions={{ padding: fitOptions().padding, maxZoom: 1 }}
       minZoom={0.1}
       zoomOnDoubleClick={false}
       disableKeyboardA11y
@@ -121,7 +142,7 @@ export function Canvas({ theme, modelSelection, onOpenSettings, arrangeOnLoad = 
       proOptions={{ hideAttribution: true }}
     >
       <Background gap={20} />
-      {arrangeOnLoad && <ArrangeOnLoad onDone={arranged} />}
+      {arrangeOnLoad ? <ArrangeOnLoad onDone={arranged} /> : <FitOnLoad onDone={arranged} />}
       <ProposalReview />
       <AlignmentGuides guides={guides} />
       <Sidebar tool={tool} onToolChange={setTool} onOpenSettings={onOpenSettings} />

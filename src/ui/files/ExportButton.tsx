@@ -36,7 +36,7 @@ export function ExportButton({ className, onError }: ExportButtonProps) {
       className={className}
     >
       <Download size={14} strokeWidth={1.75} />
-      Export PNG
+      <span className="max-sm:sr-only">Export PNG</span>
     </button>
   );
 }

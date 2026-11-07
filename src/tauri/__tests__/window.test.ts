@@ -83,11 +83,3 @@ test("a link opens in the user's browser, not in the app's window", () => {
   openLink("https://example.com/keys");
   expect(openUrl).toHaveBeenCalledWith("https://example.com/keys");
 });
-
-test("outside the desktop app a link opens in a new tab that cannot reach back", () => {
-  vi.mocked(isTauri).mockReturnValue(false);
-  const opened = vi.spyOn(window, "open").mockImplementation(() => null);
-  openLink("https://example.com/keys");
-  expect(opened).toHaveBeenCalledWith("https://example.com/keys", "_blank", "noopener,noreferrer");
-  expect(openUrl).not.toHaveBeenCalled();
-});

@@ -197,6 +197,16 @@ body {
   opacity: 1;
 }
 
+@media (pointer: coarse) {
+  .react-flow__node:not(.selected) .react-flow__handle {
+    pointer-events: none;
+  }
+
+  .react-flow__handle::after {
+    inset: -14px;
+  }
+}
+
 .react-flow__node .react-flow__handle:hover,
 .react-flow__node .react-flow__handle.connectingfrom,
 .react-flow__node .react-flow__handle.connectingto {
