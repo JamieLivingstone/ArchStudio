@@ -1,11 +1,11 @@
 import { ExternalLink, Eye, EyeOff, KeyRound, Monitor, Moon, Sun, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { version } from "../../../package.json";
+import { repository, version } from "../../../package.json";
 import { type ModelProvider, providers } from "../../providers";
 import { isDesktop } from "../../tauri/providers";
-import { openLink } from "../../tauri/window";
 import { Dialog } from "../components/Dialog";
 import { IconButton } from "../components/IconButton";
+import { Link } from "../components/Link";
 import { type Segment, SegmentedControl } from "../components/SegmentedControl";
 import { reason } from "../errorReason";
 import type { ModelSelection } from "./useModelSelection";
@@ -20,7 +20,7 @@ const themes: Segment<Theme>[] = [
 const primaryButton =
   "rounded-lg bg-accent px-3 py-1.5 text-xs font-medium text-surface hover:opacity-90 disabled:opacity-35";
 const quietButton = "rounded-lg px-2.5 py-1.5 text-xs text-muted hover:bg-hover hover:text-fg";
-const BEST_PRACTICES = "https://github.com/JamieLivingstone/ArchStudio#api-key-best-practices";
+const BEST_PRACTICES = `${repository}#api-key-best-practices`;
 const link = "inline-flex items-center gap-1 font-medium text-accent hover:underline";
 
 // The same test the native layer applies before a key reaches the keychain.
@@ -115,10 +115,10 @@ function KeyForm({
         )
       )}
       <p className="text-xs">
-        <button type="button" onClick={() => openLink(provider.keysUrl)} className={link}>
+        <Link href={provider.keysUrl} className={link}>
           Get a key
           <ExternalLink size={11} />
-        </button>
+        </Link>
       </p>
     </form>
   );
@@ -220,10 +220,10 @@ export function SettingsDialog({ open, onClose, theme, onThemeChange, modelSelec
           {isDesktop()
             ? "Your diagram and key only go to the provider you use. Keys are kept in your system keychain."
             : "Your diagram and key only go to the provider you use. Keys stay in this tab until you close it."}{" "}
-          <button type="button" onClick={() => openLink(BEST_PRACTICES)} className={link}>
+          <Link href={BEST_PRACTICES} className={link}>
             Key best practices
             <ExternalLink size={11} />
-          </button>
+          </Link>
         </p>
       </div>
     </Dialog>

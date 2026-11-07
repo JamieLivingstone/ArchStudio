@@ -151,13 +151,13 @@ test("shows which version this is, for bug reports", () => {
 
 test("points to the best practices for keys", async () => {
   setup();
-  await userEvent.click(button(/Key best practices/));
+  await userEvent.click(screen.getByRole("link", { name: /Key best practices/ }));
   expect(openLink).toHaveBeenCalledWith("https://github.com/JamieLivingstone/ArchStudio#api-key-best-practices");
 });
 
 test("points to where a key comes from", async () => {
   const { provider } = setup();
-  await userEvent.click(provider("OpenAI").getByRole("button", { name: /Get a key/ }));
+  await userEvent.click(provider("OpenAI").getByRole("link", { name: /Get a key/ }));
   expect(openLink).toHaveBeenCalledWith("https://platform.openai.com/api-keys");
 });
 

@@ -25,6 +25,5 @@ export function interceptWindowClose(shouldAsk: () => boolean, ask: () => void):
 export const closeWindow = () => getCurrentWindow().destroy();
 
 export function openLink(url: string) {
-  if (isTauri()) openUrl(url).catch((error: unknown) => console.error("Could not open the link", error));
-  else window.open(url, "_blank", "noopener,noreferrer");
+  openUrl(url).catch((error: unknown) => console.error("Could not open the link", error));
 }
