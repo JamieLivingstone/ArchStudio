@@ -1,6 +1,7 @@
-import { Panel } from "@xyflow/react";
+import { Panel, useReactFlow } from "@xyflow/react";
 import { PanelRight, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useFitDiagram } from "../canvas/hooks/useFitDiagram";
 import { IconButton } from "../components/IconButton";
 import type { ModelSelection } from "../settings/useModelSelection";
 import { hasCommandKey, useKeyDown } from "../useKeyDown";
@@ -14,6 +15,22 @@ const tabs: { value: Tab; label: string }[] = [
   { value: "properties", label: "Properties" },
   { value: "assistant", label: "Assistant" },
 ];
+
+function useRevealAboveSheet(selection: string, open: boolean) {
+  const { getZoom } = useReactFlow();
+  const fitDiagram = useFitDiagram();
+
+  useEffect(() => {
+    const id = selection.split("\n")[0];
+    if (!open || !id || window.innerWidth >= 640) return;
+    const timer = window.setTimeout(() => {
+      const sheet = document.querySelector("[data-inspector]")?.getBoundingClientRect();
+      const node = document.querySelector(`.react-flow__node[data-id="${CSS.escape(id)}"]`)?.getBoundingClientRect();
+      if (sheet && node && node.bottom > sheet.top) void fitDiagram({ ids: [id], maxZoom: getZoom() });
+    }, 220);
+    return () => window.clearTimeout(timer);
+  }, [selection, open, getZoom, fitDiagram]);
+}
 
 interface InspectorProps {
   modelSelection: ModelSelection;
@@ -39,6 +56,8 @@ export function Inspector({ modelSelection, onOpenSettings }: InspectorProps) {
       setOpenedBySelection(false);
     }
   }
+
+  useRevealAboveSheet(selection, open);
 
   function show(next: Tab) {
     setOpenedBySelection(false);
@@ -70,7 +89,7 @@ export function Inspector({ modelSelection, onOpenSettings }: InspectorProps) {
         data-inspector
         aria-hidden={!open}
         inert={!open}
-        className={`nopan floating flex h-[calc(100%-30px)] w-80 select-none max-w-[calc(100%-30px)] origin-top-right flex-col rounded-xl text-sm text-fg transition-[opacity,scale,visibility] duration-200 ease-out motion-reduce:transition-none ${
+        className={`nopan floating flex h-[calc(100%-30px)] w-80 select-none max-w-[calc(100%-30px)] origin-top-right flex-col rounded-xl text-sm text-fg transition-[opacity,scale,visibility] duration-200 ease-out motion-reduce:transition-none max-sm:inset-x-0 max-sm:top-auto! max-sm:z-20! max-sm:bottom-0 max-sm:m-0! max-sm:h-[55%] max-sm:w-full max-sm:max-w-none max-sm:origin-bottom max-sm:rounded-b-none max-sm:border-x-0 max-sm:border-b-0 max-sm:pb-[env(safe-area-inset-bottom)] ${
           open ? "scale-100 opacity-100" : "invisible pointer-events-none scale-95 opacity-0"
         }`}
       >

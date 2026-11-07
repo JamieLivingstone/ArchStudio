@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef } from "react";
 import { applyOperations } from "../../diagram/apply";
 import { proposalRows } from "../proposal";
 import { acceptProposal, arrangeProposal, getAppState, pendingProposal, rejectProposal, useAppState } from "../state";
+import { useFitDiagram } from "./hooks/useFitDiagram";
 import { arrange } from "./hooks/useFormat";
-import { fitOptions } from "./toolbar/ViewControls";
 
 const FOCUS_ZOOM = 1.25;
 const button = "flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-colors";
@@ -17,13 +17,14 @@ function useArrangedProposal() {
     ({ nodeLookup }) =>
       waiting && proposal.preview.objects.every(({ id }) => nodeLookup.get(id)?.measured.height !== undefined),
   );
-  const { getNode, fitView } = useReactFlow();
+  const { getNode } = useReactFlow();
+  const fitDiagram = useFitDiagram();
 
   const fitTimer = useRef<number | undefined>(undefined);
   const fitSoon = useCallback(() => {
     window.clearTimeout(fitTimer.current);
-    fitTimer.current = window.setTimeout(() => fitView({ ...fitOptions(), maxZoom: 1 }), 150);
-  }, [fitView]);
+    fitTimer.current = window.setTimeout(() => void fitDiagram(), 150);
+  }, [fitDiagram]);
   useEffect(() => () => window.clearTimeout(fitTimer.current), []);
 
   useEffect(() => {
@@ -57,16 +58,17 @@ function useArrangedProposal() {
 
 function useFocusedChange() {
   const focus = useAppState((state) => (state.focusOnCanvas ? undefined : state.focus));
-  const { fitView, getNodesBounds } = useReactFlow();
+  const { getNodesBounds } = useReactFlow();
+  const fitDiagram = useFitDiagram();
 
   useEffect(() => {
     if (!focus) return;
     const { connections } = pendingProposal(getAppState())?.preview ?? getAppState().diagram;
     const connection = connections.find((candidate) => candidate.id === focus);
-    const nodes = (connection ? [connection.from, connection.to] : [focus]).map((id) => ({ id }));
-    if (getNodesBounds(nodes.map(({ id }) => id)).width === 0) return;
-    fitView({ ...fitOptions(), nodes, maxZoom: FOCUS_ZOOM });
-  }, [focus, fitView, getNodesBounds]);
+    const ids = connection ? [connection.from, connection.to] : [focus];
+    if (getNodesBounds(ids).width === 0) return;
+    void fitDiagram({ ids, maxZoom: FOCUS_ZOOM });
+  }, [focus, fitDiagram, getNodesBounds]);
 }
 
 export function ProposalReview() {

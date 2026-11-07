@@ -8,14 +8,22 @@ import { acceptProposal, propose } from "../../state";
 import { ProposalReview } from "../ProposalReview";
 
 const fitView = vi.hoisted(() => vi.fn());
+const fitDiagram = vi.hoisted(() => vi.fn());
 
+vi.mock("../hooks/useFitDiagram", async (original) => ({
+  ...(await original<object>()),
+  useFitDiagram: () => fitDiagram,
+}));
 vi.mock("@xyflow/react", () => ({
   Panel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   useReactFlow: () => ({ getNode: vi.fn(), fitView, getNodesBounds: () => ({ width: 0 }) }),
   useStore: () => false,
 }));
 
-afterEach(() => fitView.mockClear());
+afterEach(() => {
+  fitView.mockClear();
+  fitDiagram.mockClear();
+});
 
 function setup() {
   seed([component("web")]);
@@ -56,9 +64,9 @@ test("once part is decided, it offers the rest", () => {
 
 test("once nothing is left to decide, the whole diagram is brought back into view", async () => {
   setup();
-  expect(fitView).not.toHaveBeenCalled();
+  expect(fitDiagram).not.toHaveBeenCalled();
   await userEvent.click(button("Reject all"));
-  await vi.waitFor(() => expect(fitView).toHaveBeenCalledTimes(1));
+  await vi.waitFor(() => expect(fitDiagram).toHaveBeenCalledTimes(1));
 });
 
 test("a fit still waiting when the canvas goes away never happens", async () => {
@@ -66,5 +74,5 @@ test("a fit still waiting when the canvas goes away never happens", async () => 
   await userEvent.click(button("Reject all"));
   cleanup();
   await new Promise((resolve) => setTimeout(resolve, 200));
-  expect(fitView).not.toHaveBeenCalled();
+  expect(fitDiagram).not.toHaveBeenCalled();
 });
