@@ -23,6 +23,8 @@ Free, open source and no account needed.</p>
   <img src="docs/screenshot.jpg" alt="ArchStudio with the assistant proposing a cache in front of an orders database: the new cache and changed database are marked on the canvas, and each change can be accepted or rejected in the assistant panel">
 </div>
 
+![ArchStudio — ask the assistant for a change, then review it like a pull request and accept or reject each part](./docs/archstudio-demo.gif)
+
 ## Features
 
 - **A canvas that gets out of your way:** drag in components, snap to alignment, copy and paste, zoom with a minimap, and undo anything
